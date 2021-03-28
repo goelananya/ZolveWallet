@@ -1,11 +1,11 @@
-package com.zolve.wallet.util;
+package com.zolve.wallet.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ResponseWrapper{
+public class ErrorWrapper {
     String message;
     Object data;
 }

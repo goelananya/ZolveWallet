@@ -5,6 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface TransactionRepo extends CrudRepository<Transaction, Long> {
-    List<Transaction> findAllByUserId(Long userId);
+public interface TransactionRepo extends CrudRepository<Transaction, String> {
+    List<Transaction> findAllByUserName(String userName);
 }

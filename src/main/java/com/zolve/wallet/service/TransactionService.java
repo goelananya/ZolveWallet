@@ -2,11 +2,13 @@ package com.zolve.wallet.service;
 
 import com.zolve.wallet.bo.Transaction;
 import com.zolve.wallet.bo.Wallet;
+import com.zolve.wallet.exception.DuplicateUserNameException;
 import com.zolve.wallet.exception.InvalidUserIdException;
 import com.zolve.wallet.exception.LowBalanceException;
 import com.zolve.wallet.exception.NoTransactionsException;
 import com.zolve.wallet.repo.TransactionRepo;
 import com.zolve.wallet.repo.WalletRepo;
+import com.zolve.wallet.util.Constants;
 import com.zolve.wallet.util.TransactionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,16 +28,20 @@ public class TransactionService {
     public TransactionService(TransactionRepo transactionRepo, WalletRepo walletRepo) {
         this.transactionRepo = transactionRepo;
         this.walletRepo = walletRepo;
-        MIN_BALANCE = Integer.parseInt(System.getenv("minBalance"));
+        if(System.getenv("minBalance")==null) {
+            MIN_BALANCE = Constants.defaultMinBalance;
+        } else {
+            MIN_BALANCE = Integer.parseInt(System.getenv("minBalance"));
+        }
     }
 
 
     @Transactional
-    public void addTransaction(Transaction transaction) throws LowBalanceException, InvalidUserIdException {
+    public void addTransaction(Transaction transaction) throws LowBalanceException, InvalidUserIdException, InterruptedException {
 
         float updatedBalance;
 
-        Optional<Wallet> walletOpt = walletRepo.findById(transaction.getUserId());
+        Optional<Wallet> walletOpt = walletRepo.findById(transaction.getUserName());
         if(walletOpt.isEmpty())    throw new InvalidUserIdException();
 
         Wallet wallet = walletOpt.get();
@@ -48,26 +54,14 @@ public class TransactionService {
         }
 
         wallet.setBalance(updatedBalance);
-
+        Thread.sleep(5000);    // Added to simulate race condition
         walletRepo.save(wallet);
         transactionRepo.save(transaction);
     }
 
-    public float getBalance(Long userId) throws InvalidUserIdException {
-        Optional<Wallet> wallet = walletRepo.findById(userId);
-
-        if(wallet.isEmpty())    throw new InvalidUserIdException();
-
-        return wallet.get().getBalance();
-    }
-
-    public List<Transaction> getTransactions(Long userId) throws NoTransactionsException {
-        List<Transaction> transactionList = transactionRepo.findAllByUserId(userId);
+    public List<Transaction> getTransactions(String userName) throws NoTransactionsException {
+        List<Transaction> transactionList = transactionRepo.findAllByUserName(userName);
         if(transactionList.size()==0) throw new NoTransactionsException();
         return transactionList;
-    }
-
-    public void createWallet(Wallet wallet) {
-        walletRepo.save(wallet);
     }
 }

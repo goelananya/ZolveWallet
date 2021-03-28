@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 public class Transaction {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     Long transactionId;
-    Long userId;
+    String userName;
     float transactionAmount;
     String transactionType;
     @CreationTimestamp
