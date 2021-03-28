@@ -26,6 +26,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         logger.info(e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorWrapper("Invalid Request", e.getMessage()));
     }
+    @ExceptionHandler(NoTransactionsException.class)
+    public ResponseEntity exceptionHandler(NoTransactionsException e) {
+        logger.info(e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorWrapper("Invalid Request", e.getMessage()));
+    }
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity exceptionHandler(ObjectOptimisticLockingFailureException e) {
         logger.info(e);
